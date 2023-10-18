@@ -14,8 +14,10 @@
 
 void handle_terminalinp(char *input)
 {
-char *trim_inp *token;
-int inp_len *tokens[MAX_TOKENS]
+char *trim_inp;
+char *token;
+int inp_len;
+char *tokens[MAX_TOKENS];
 int i = 0;
 
 trim_inp = input;
