@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "main.h"
-
+#include "builtin.h"
 /**
  * exit_builtin - to exit the current environment
  *
@@ -29,3 +29,23 @@ while (*env_when)
 	env_when++;
 }
 }
+
+void helpCommand() {
+    printf("Simple Shell Help:\n");
+    printf("  help - Display this help message\n");
+    printf("  cd   - Change the current directory\n");
+    printf("  exit - Exit the shell\n");
+}
+
+void cdCommand(char *directory) {
+    if (directory == NULL) {
+        printf("Usage: cd [directory]\n");
+    } else {
+        if (chdir(directory) == 0) {
+            printf("Changed directory to %s\n", directory);
+        } else {
+            perror("cd");
+        }
+    }
+}
+
