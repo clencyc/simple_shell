@@ -2,54 +2,68 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "term.h"
-#include "builtin.h"
-#include "execute.h"
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define BUFFER_SIZE 1024
 
-/**
- * main - entry point
- *
- *
- * Return 0
- */
 int main()
 {
-char *args[] = {"/bin/ls", NULL};
-char input[BUFFER_SIZE];
-char *line = NULL;
+char *input = NULL;
+int status;
+pid_t child_pid;
 size_t len = 0;
-ssize_t n = getline(&line, &len, stdin);
+ssize_t n;
 int interactive = isatty(STDIN_FILENO);
 
+if (interactive)
+{
+	printf("($) ");
+	setbuf(stdout, NULL);
+}
 while (1)
 {
-	if (interactive)
-	{
-            printf("($) ");
-            n = getline(&line, &len, stdin);
+	n = getline(&input, &len, stdin);
 
-            if (n == -1)
-	    {
-                break;
-            }
-            line[n - 1] = '\0';
-            strcpy(input, line);
-        }
+	if (n == -1)
+	{
+               	break;
+	}
+	input[n - 1] = '\0';
+       
+	child_pid = fork();
+
+        if (child_pid == -1)
+	{
+		perror("Fork failed");
+            	exit(EXIT_FAILURE);
+	}
+        if (child_pid == 0)
+	{
+		if (execlp(input, input, (char *)NULL) == -1)
+		{
+			perror("./shell ");
+                	exit(EXIT_FAILURE);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
 	{
-            n = getline(&line, &len, stdin);
-            if (n == -1)
-	    {
-                break;
-            }
-            line[n - 1] = '\0';
-            strcpy(input, line);
-        }
-        execute_command(args);
+            	pid_t terminated_pid = waitpid(child_pid, &status, 0);
+
+		if (terminated_pid == -1)
+		{
+			perror("Waitpid failed");
+                	exit(EXIT_FAILURE);
+		}
+	}
+
+	if (interactive)
+	{
+		printf("($) ");
+	}
 }
 
-free(line);
+free(input);
 return (0);
 }
