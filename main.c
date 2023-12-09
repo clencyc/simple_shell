@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#define BUFFER_SIZE 1024
+#include "main.h"
 
 /*
  * main: This is the main function of the code
@@ -21,13 +15,13 @@ int main()
         ssize_t n;
         int interactive = isatty(STDIN_FILENO);
 
-        if (interactive)
-        {
-                printf("($) ");
-                setbuf(stdout, NULL);
-        }
         while (1)
-        {
+	{
+		if (interactive)
+		{
+			printf("($) ");
+			setbuf(stdout, NULL);
+		}
                 n = getline(&input, &len, stdin);
 
                 if (n == -1)
@@ -62,13 +56,7 @@ int main()
                                 exit(EXIT_FAILURE);
                         }
                 }
-
-                if (interactive)
-                {
-                        printf("($) ");
-                }
         }
-        if(n==exit)
 
         free(input);
         return (0);
