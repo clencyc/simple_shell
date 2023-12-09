@@ -1,51 +1,46 @@
-#include "execute.h"
-
+#include "main.h"
 /**
- * execute_command - to execute command passed by user.
- * @*path: stores value of the PATH env variable
- * @*path_tk: iterates through each dir in the PATH
- * @find: tracks whther command is found
- * @args: argument contains command from user
- * Return: void
+ * execCmd - executes command
  */
+ 
 
-void execute_command(char *args[])
+void execCmd(char **argv)
 {
-char *path, *path_tk;
-int find;
-path = getenv("PATH");
-
-for (path_tk = strtok(path, ":"); path_tk; path_tk = strtok(NULL, ":"))
-{
-	char file_path[1024];
-	snprintf(file_path, sizeof(file_path), "%s/%s", path_tk, args[0]);
-
-	if (access(file_path, X_OK) == 0)
+	char *command = NULL, *actualCommand = NULL;
+	int status;
+	pid_t pid;
+	
+	if(argv)
 	{
-		find = 1;
-		break;
-	}
-}
-if (find)
-{
-	pid_t pid = fork();
-
-	if (pid == 0)
-	{
-		if (execvp(args[0], args) == -1)
+		command = argv[0];
+		actualCommand = command_Location(command);
+		
+		if (actualCommand && access(actualCommand, X_OK) == 0)
 		{
-			perror(args[0]);
-			exit(1);
+			pid = fork();
+			
+			if (pid < 0)
+			{
+				perror("Error");
+				exit(1);
+			}
+			else if (pid == 0)
+			{
+			if (execve(actualCommand, argv, NULL) == -1)
+			{
+				perror("Error");
+				exit(1);
+			}
+			}
+			else
+			{
+			waitpid(pid, &status, 0);
+			}
 		}
-	} else if (pid < 0)
-	{
-		perror("fork");
-	} else
-	{
-		wait(NULL);
+		else
+		{
+			perror("Command");
+		}
 	}
-} else
-{
-	printf("Command not found: %s\n", args[0]);
 }
-}
+

@@ -1,6 +1,6 @@
-#include <stdlib.h>
+
 #include "main.h"
-#include "builtin.h"
+
 /**
  * exit_builtin - to exit the current environment
  *
